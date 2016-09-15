@@ -91,19 +91,27 @@ class DocumentStorage
         $nowString = $now->format('Y-m-d H:i:s');
 
         if ($database) {
-            $return->id = $database->insert(
+            $entity = $database->findOneBy(
                 'document_storage_file',
-                [
-                    'file_extension_original' => null,
-                    'file_name_original' => null,
-                    'created' => $nowString,
-                    'file_size' => $return->getSize(),
-                    'file_extension' => $return->extension,
-                    'file_mime_type' => $return->mime,
-                    'hash' => $return->hash,
-                    'file_name' => $file->name,
-                ]
+                ['hash' => $return->hash]
             );
+            if ($entity) {
+                $return->id = $entity->id;
+            } else {
+                $return->id = $database->insert(
+                    'document_storage_file',
+                    [
+                        'file_extension_original' => null,
+                        'file_name_original' => null,
+                        'created' => $nowString,
+                        'file_size' => $return->getSize(),
+                        'file_extension' => $return->extension,
+                        'file_mime_type' => $return->mime,
+                        'hash' => $return->hash,
+                        'file_name' => $file->name,
+                    ]
+                );
+            }
         }
 
         return $return;
