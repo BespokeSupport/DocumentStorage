@@ -1,0 +1,29 @@
+{
+  "name": "bespoke-support/document-storage",
+  "description": "Document Storage",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Richard Seymour",
+      "email": "web@bespoke.support"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "BespokeSupport\\DocumentStorage\\": "lib/"
+    }
+  },
+  "require": {
+    "php": ">=5.4.0",
+    "bespoke-support/mime": "@dev"
+  },
+  "require-dev": {
+    "bespoke-support/database-wrapper": "@dev"
+  },
+  "suggest": {
+    "bespoke-support/database-wrapper": "@dev"
+  },
+  "scripts":{
+    "post-autoload-dump": ["BespokeSupport\\Mime\\FileMimesGenerator::composerGenerate"]
+  }
+}
