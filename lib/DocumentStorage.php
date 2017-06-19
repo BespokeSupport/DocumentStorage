@@ -22,6 +22,24 @@ class DocumentStorage
 {
     /**
      * @param $contents
+     * @return string
+     */
+    public static function base64encode($contents)
+    {
+        return strtr(base64_encode($contents), '+/=', '-_,');
+    }
+
+    /**
+     * @param $contents
+     * @return bool|string
+     */
+    public static function base64decode($contents)
+    {
+        return base64_decode(strtr($contents, '-_,', '+/='));
+    }
+
+    /**
+     * @param $contents
      * @return EntityFile
      */
     public static function contentsToFile($contents)
@@ -108,13 +126,106 @@ class DocumentStorage
                         'file_extension' => $return->extension,
                         'file_mime_type' => $return->mime,
                         'hash' => $return->hash,
-                        'file_name' => $file->name,
+                        'file_name' => (($file->name) ? : $return->hash . '.' . $return->extension),
                     ]
                 );
             }
         }
 
         return $return;
+    }
+
+    /**
+     * @param EntityFile $file
+     * @param AbstractDatabaseWrapper|null $database
+     * @return EntityFile
+     * @throws \Exception
+     */
+    public static function associatedEntitySave(EntityFile $file, AssociatedEntity $associatedEntity, AbstractDatabaseWrapper $database)
+    {
+        $entityDb = $database->findOneBy(
+            'document_storage_entity',
+            [
+                'entity_class' => $associatedEntity->entity,
+                'entity_id' => $associatedEntity->id,
+            ]
+        );
+
+        if ($entityDb) {
+            $entityId = $entityDb->id;
+        } else {
+            $entityId = $database->insert(
+                'document_storage_entity',
+                [
+                    'entity_class' => $associatedEntity->entity,
+                    'entity_id' => $associatedEntity->id,
+                ]
+            );
+        }
+
+        $entityDb = $database->findOneBy(
+            'document_storage_file_entities',
+            [
+                'file_id' => $file->id,
+                'entity_id' => $entityId,
+            ]
+        );
+
+        if (!$entityDb) {
+            return $database->insert(
+                'document_storage_file_entities',
+                [
+                    'file_id' => $file->id,
+                    'entity_id' => $entityId,
+                ]
+            );
+        }
+
+        return null;
+    }
+    /**
+     * @param EntityFile $file
+     * @param AbstractDatabaseWrapper|null $database
+     * @return EntityFile
+     * @throws \Exception
+     */
+    public static function tagEntitySave(EntityFile $file, $tag, AbstractDatabaseWrapper $database)
+    {
+        $entityDb = $database->findOneBy(
+            'document_storage_tag',
+            [
+                'tag' => $tag,
+            ]
+        );
+
+        if (!$entityDb) {
+            $database->insert(
+                'document_storage_tag',
+                [
+                    'tag' => $tag,
+                ]
+            );
+        }
+
+        $entityDb = $database->findOneBy(
+            'document_storage_file_tags',
+            [
+                'file_id' => $file->id,
+                'tag' => $tag,
+            ]
+        );
+
+        if (!$entityDb) {
+            return $database->insert(
+                'document_storage_file_tags',
+                [
+                    'file_id' => $file->id,
+                    'tag' => $tag,
+                ]
+            );
+        }
+
+        return null;
     }
 
     /**
