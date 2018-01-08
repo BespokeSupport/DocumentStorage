@@ -87,6 +87,10 @@ class DocumentStorage
         if (!is_writeable($path)) {
             throw new \Exception('Not Writable');
         }
+        
+        if (!$file->hash) {
+            $file = self::entityPopulate($file);
+        }
 
         $savePath = $path . DIRECTORY_SEPARATOR . $file->hash;
 
