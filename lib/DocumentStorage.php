@@ -124,7 +124,7 @@ class DocumentStorage
                     'document_storage_file',
                     [
                         'file_extension_original' => null,
-                        'file_name_original' => null,
+                        'file_name_original' => $file->original,
                         'created' => $nowString,
                         'file_size' => $return->getSize(),
                         'file_extension' => $return->extension,

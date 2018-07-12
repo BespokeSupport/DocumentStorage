@@ -37,6 +37,10 @@ class EntityFile extends \SplFileInfo
      * @var string
      */
     public $name;
+    /**
+     * @var string
+     */
+    public $original;
 
     /**
      * EntityFile constructor.
